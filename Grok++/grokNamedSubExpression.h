@@ -80,7 +80,7 @@ public:
 
 	bool value(tm* timeOfCall, string* valueAsString, char * dateTimeFormat)
 	{
-		if (desiredType != StringType)
+		if (desiredType != TimestampType)
 			return false;
 
 		(*valueAsString) = _value;

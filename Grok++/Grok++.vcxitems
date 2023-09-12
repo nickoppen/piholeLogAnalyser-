@@ -16,7 +16,11 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)grok.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)grokException.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)grokItem.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)grokNamedSubExpression.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)grokResult.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Grok.cpp" />
   </ItemGroup>
 </Project>
