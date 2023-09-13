@@ -81,8 +81,7 @@
     <LibraryPath>/usr/local/lib/aarch64-linux-gnu/mariadb</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <IncludePath>
-    </IncludePath>
+    <IncludePath>/usr/include/mariadb</IncludePath>
     <LibraryPath>/usr/lib/mariadb</LibraryPath>
     <ExcludePath>
     </ExcludePath>
@@ -104,6 +103,9 @@
     <ClInclude Include="dbInterface.h" />
     <ClInclude Include="DNSQuery.h" />
     <ClInclude Include="piholeLogAnalyserDefs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="grokCustom.txt" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -130,7 +132,7 @@
     </ClCompile>
     <Link>
       <VerboseOutput>false</VerboseOutput>
-      <LibraryDependencies>mariadb;mariadbcpp;pthread;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>mariadb;mariadbcpp;pthread;stdc++fs;%(LibraryDependencies)</LibraryDependencies>
     </Link>
     <PreBuildEvent>
       <Command>

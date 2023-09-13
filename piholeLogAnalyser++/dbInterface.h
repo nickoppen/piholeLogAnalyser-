@@ -5,6 +5,7 @@
 
 #include <ctime>
 #include <iostream>
+#include <iomanip>
 
 using namespace std;
 using namespace sql;
@@ -266,7 +267,7 @@ private:
 	{
 		//stringstream ss;
 		ss.str("");
-		ss << std::put_time(&dt, "%Y-%m-%d %T");
+		ss << put_time(&dt, "%Y-%m-%d %T");
 		return  ss.str();
 	}
 
