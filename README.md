@@ -1,26 +1,26 @@
 # Grok++
-A C++ implementation of Roman Marusyk's Grok.Net (https://github.com/Marusyk/grok.net). All credit for the design goes to him.
+A C++ implementation of Roman Marusyk's [Grok.Net](https://github.com/Marusyk/grok.net). All credit for the design goes to him.
 
-##To Compile
+## To Compile
 - include -pthread as a dependency in linker options
 
-###To Run
+## To Run
 - Copy grok-patterns (pre-made custom patterns) to the executable's directory
 
 # PiholeLogAnalyser++
-An interpreter/loader for pihole log files.
+An interpreter/loader for pihole log files. Output is stored in a MariaDB database.
 
 Written in C++ and developed on the pi.
 
-##Prerequisites:
+## Prerequisites:
 - An instance of MariaDB 
 - MariaDB_connector_cpp available from https://mariadb.com/docs/skysql-previous-release/connect/programming-languages/cpp/install/ (this can be tricky to install)
 
-##To Compile
+## To Compile
 - in linker directory options include -lmariadb once libmariadb.so (linked to libmariadb.so.3) is in /usr/lib/mariadb
 - include stdc++fs as a linker dependency
 
-##To Run
+## To Run
 - Set up the database as per the database schema
 - Copy your grok custom pattern file to an accessible location (default: ./grokCustom.txt) Note: if you have scheduled execution using cron then . (current directory) is the users home directory. 
 - Commandline options are:
