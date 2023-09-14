@@ -232,7 +232,7 @@ clock_t processLogFile(string pathFileName, grok* grk, dbInterface * db, ofstrea
         {
 
             getline(logFile, logLine, '\n');
-            grkRes = grk->Parse(logLine, timeLimitInMilliseconds);
+            grkRes = grk->Parse(logLine);//, timeLimitInMilliseconds);
             if (grkRes->timedOut)
             {
                 (*errorLogger) << "Time out: >" << logLine << "<" << endl;

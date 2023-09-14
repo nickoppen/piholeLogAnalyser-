@@ -9,7 +9,7 @@ LOGDIRECTIONFROM from
 LOGDIRECTIONIS is
 LOGDIRECTIONTO to
 #LOGDIRECTION (from|is|to)
-LOGDOMAIN ({%LOGIP}|error|((?:[A-Z0-9a-z-_~:\/?#\[\]\-@!\$&'\(\)\*\+,:%=]*)\.?)*)
+LOGDOMAIN (%{LOGIP}|error|((?:[A-Z0-9a-z-_~:\/?#\[\]\-@!\$&'\(\)\*\+,:%=]*)\.?)*)
 LOGEMAIL [a-zA-Z][a-zA-Z0-9_.+-=:]+@%{LOGDOMAIN}
 LOGIPV4ELEMENT [0-9]{1,3}
 LOGIPV6ELEMENT ([0-9]|[a-f]|[A-F]){0,4}:{1,2}

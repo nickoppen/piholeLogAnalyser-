@@ -17,6 +17,7 @@ Written in C++ and developed on the pi.
 - MariaDB_connector_cpp available from https://mariadb.com/docs/skysql-previous-release/connect/programming-languages/cpp/install/ (this can be tricky to install)
 
 ## To Compile
+- compile to gnu++17
 - in linker directory options include -lmariadb once libmariadb.so (linked to libmariadb.so.3) is in /usr/lib/mariadb
 - include stdc++fs as a linker dependency
 
