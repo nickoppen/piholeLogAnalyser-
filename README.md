@@ -17,7 +17,7 @@ Written in C++ and developed on the pi.
 - MariaDB_connector_cpp available from https://mariadb.com/docs/skysql-previous-release/connect/programming-languages/cpp/install/ (this can be tricky to install)
 
 ## To Compile
-- compile to gnu++17
+- compile to gnu++17 standard
 - in linker directory options include -lmariadb once libmariadb.so (linked to libmariadb.so.3) is in /usr/lib/mariadb
 - include stdc++fs as a linker dependency
 
@@ -30,7 +30,7 @@ Written in C++ and developed on the pi.
             -r : scan recursively (recurse == false)
             -f 'Filename pattern' : load a specific log file with wildcards ? and \* (default: pihole.log.1) Note: '' to ensure that the wildcards are not expanded by the shell
             -p : Pretend to add to the database (default: false)
-            -t milliseconds : max exec time for regex match function
+            -t milliseconds : max exec time for regex match function (default == 0 or no time limit)
             -g File name : specify the location of the grok custom pattern file (default: ./grokCustom.txt)
             -e Full path to the load error file (default: ./loadError.txt)
             -user username : log in to the database with the given username

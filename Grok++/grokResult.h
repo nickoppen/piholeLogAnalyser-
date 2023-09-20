@@ -66,7 +66,7 @@ public:
 		//unique_ptr<grokNamedSubExpression> newItem = make_unique<grokNamedSubExpression>(expressionName, expressionType);
 		grokNamedSubExpression newItem(expressionName, expressionType);
 
-		items.insert(make_pair(expressionName, expressionType));
+		items.insert(make_pair(expressionName, newItem));
 
 	}
 

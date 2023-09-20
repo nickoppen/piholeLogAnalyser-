@@ -66,6 +66,12 @@ public:
         AddPatterns(customPatterns);
     }
 
+    /// <summary>
+    /// Parse the give text based on the regular expression generated from the Grok pattern
+    /// Return a pointer to the member variable grkRes which is an instance of grokResult 
+    /// </summary>
+    /// <param name="test">The text to be parsed.</param>
+    /// <param name="milliseconds">The time limit (in milliseconds) for regex to be allowed to run</param>
     grokResult * Parse(string text, unsigned long milliSeconds = 0)
     {
         grkRes.reset();
@@ -79,17 +85,22 @@ public:
             std::future<bool> matchThread = std::async(std::launch::async, [&] { return matchText(text); });
 
             if (matchThread.wait_for(std::chrono::milliseconds(milliSeconds)) == std::future_status::timeout)
-                grkRes.timedOut = true;
+                grkRes.timedOut = true;     // matchText returned within the time limit
             else
-                grkRes.timedOut = false;
+                grkRes.timedOut = false;    // matchText did not return
         }
 
         return &grkRes;
     }
 
-    void ParseGrokString(string grokPattern = "")
+    /// <summary>
+    /// Convert a Grok pattern into a regular expression
+    /// The arguement allows for the Grok expression to change over the life of the objcect
+    /// </summary>
+    /// <param name="grokPattern">A new patter (default is the one passed on creatioin).</param>
+    string ParseGrokString(string grokPattern = "")
     {
-        string pattern;
+        static string pattern;
         string replacedString = "";
 
         if (grokPattern != "")
@@ -113,35 +124,17 @@ public:
             }
 
             //// replace the named components with the expanded version 
-            map<string, string> replacements;
-            string expandedExpression;
-            string rxReplacePattern;
-            regex rxReplace;
-            regex rxDollarSign("\\$");
-            searchString = replacedString;
-            for (smatch smat; regex_search(searchString, smat, _grokNamedExpression);)
-            {
-                rxReplacePattern = "%\\{" + smat.str(1) + ":" + smat.str(2) + ".*?\\}";
-                if (replacements.find(rxReplacePattern) == replacements.end())
-                {
-                    expandedExpression = regex_replace(replaceWithName(smat), rxDollarSign, "$$$$");
-                    replacements.insert(make_pair(rxReplacePattern, expandedExpression));
-                }
-                searchString = smat.suffix().str();
-            }
+            // collect all of the components that need to be replace along with what they need to be replace with
+            map<string, string> replacements;   // the map of rx strings and expanded expressions that will replace the grok components
+            regex rxReplace;                    // the regex object that does the replacement
+            regex rxDollarSign("\\$");          // replace $ with $$ because $ is a special char in rxReplace
 
-            // do the same for the unnamed components
-            searchString = replacedString;
-            for (smatch smat; regex_search(searchString, smat, _grokUnnamedExpression);)
-            {
-                rxReplacePattern = "%\\{" + smat.str(1) + "\\}";
-                if (replacements.find(rxReplacePattern) == replacements.end())
-                {
-                    expandedExpression = regex_replace(replaceWithoutName(smat), rxDollarSign, "$$$$");
-                    replacements.insert(make_pair(rxReplacePattern, expandedExpression));
-                }
-                searchString = smat.suffix().str();
-            }
+            std::function<string(string, string)> generateReplacePatternForNamedExpression = [](string part1, string part2) -> string { string pattern("%\\{" + part1 + ":" + part2 + ".*?\\}"); return pattern; };
+            findGrokSubExpressionReplacements(replacedString, _grokNamedExpression, generateReplacePatternForNamedExpression, &replacements);
+
+            //// do the same for the unnamed components
+            std::function<string(string, string)> generateReplacePatternForUnnamedExpression = [](string part1, string part2) -> string { string pattern("%\\{" + part1 + "\\}"); return pattern; };
+            findGrokSubExpressionReplacements(replacedString, _grokUnnamedExpression, generateReplacePatternForUnnamedExpression , &replacements);
 
             for (auto it = replacements.begin(); it != replacements.end(); it++)
             {
@@ -160,6 +153,8 @@ public:
 
         pattern = createNameIndexRemovingNames(pattern);        /// remove when std::regex has named groups
         _compiledRegex.assign(pattern, std::regex::optimize);
+        return pattern;
+
     }
 
 private:
@@ -185,6 +180,25 @@ private:
         }
     }
 
+    string findGrokSubExpressionReplacements(string searchString, regex rxSubExpression, std::function<string(string, string)> generateRxPattern, map<string, string> * replacements)
+    {
+        string rxReplacePattern;    // the rx string of all grok sub expressions that need to be replace
+        string expandedExpression;  // the expanded subexpression that may include further grok components that need replacing
+        regex rxDollarSign("\\$");
+
+        for (smatch smat; regex_search(searchString, smat, rxSubExpression);)
+        {
+            rxReplacePattern = generateRxPattern(smat.str(1), smat.str(2));
+            if (replacements->find(rxReplacePattern) == replacements->end())
+            {
+                expandedExpression = regex_replace(replaceWithName(smat), rxDollarSign, "$$$$");
+                replacements->insert(make_pair(rxReplacePattern, expandedExpression));
+            }
+            searchString = smat.suffix().str();
+        }
+        return expandedExpression;
+    }
+
     void loadCustomPatterns(ifstream* customPatternFile)
     {
         LoadPatterns(customPatternFile);
@@ -192,8 +206,8 @@ private:
 
     void AddPatterns(map<string, string>customPatterns)
     {
-        for (std::map<string, string>::iterator it = customPatterns.begin(); it != customPatterns.end(); ++it)
-            AddPatternIfNotExists(it->first, it->second);
+        for (std::map<string, string>::iterator pattern = customPatterns.begin(); pattern != customPatterns.end(); ++pattern)
+            AddPatternIfNotExists(pattern->first, pattern->second);
     }
 
     void AddPatternIfNotExists(string key, string value)
@@ -338,14 +352,10 @@ private:
         _groupNames.push_back(match.str(2));    // record the names as we go
 
         return "(?<" + match.str(2) + ">"+rxExpansion+")";  // c++11 does not have named capture groups
-        //return "(" + rxExpansion + ")";
-
     }
 
     string replaceWithoutName(smatch match)
     {
-
-        string rxExpansion;
         map<string, string>::iterator foundKey = _patterns.find(match.str(1));
 
         if (foundKey == _patterns.end())

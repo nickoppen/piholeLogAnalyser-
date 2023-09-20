@@ -113,13 +113,15 @@ void readArgs(int argc, char** argv, cliArgs * args)
     args->rxFileSpec = "pihole\\.log\\.1";
     args->rx = regex(args->rxFileSpec);
     args->errorPathFilename = "./loadError.txt";
-    args->maxExecTimeInMilliseconds = 1000;
+    args->maxExecTimeInMilliseconds = 0;
     args->customPatternFilename = "./grokCustom.txt";
     args->dbUserName = "piholeTestUser";
     args->dbUserPwd = "Test:User:123";
     args->serverIPAddress = "192.168.1.110";
     args->serverPortNumber = "3306";
     args->databaseName = "dbPiholeLogTest";
+
+    cout << "Regex locale is set to:" << args->rx.getloc().name() << " Classic:" << args->rx.getloc().classic().name() << " System wide:" << locale().name() << endl;
 
     string arg;
 
@@ -188,7 +190,7 @@ void readArgs(int argc, char** argv, cliArgs * args)
             cout << "-r : scan recursively (recurse == false)" << endl;
             cout << "-f 'Filename pattern' : load a specific log file with wildcards ? and * (default: pihole.log.1)" << endl;
             cout << "-p : Pretend to add to the database (default: false)" << endl;
-            cout << "-t milliseconds : max exec time for regex" << endl;
+            cout << "-t milliseconds : max exec time for regex (default == 0 or no time limit)" << endl;
             cout << "-g File name : specify the location of the grok pattern file" << endl;
             cout << "-e Full path to the load error file" << endl;
             cout << "-user username : log in to the database with the given username" << endl;
@@ -213,6 +215,8 @@ clock_t processLogFile(string pathFileName, grok* grk, dbInterface * db, ofstrea
     clock_t ticksForThisFile = 0;
 
     ifstream logFile(pathFileName);
+    cout << "Locale for:" << pathFileName << " is:" << logFile.getloc().name() << endl;
+
     if (logFile.is_open())
     {
         dnsQuery currentQuery(db, errorLogger);// , args.customPatternFile);
@@ -230,9 +234,8 @@ clock_t processLogFile(string pathFileName, grok* grk, dbInterface * db, ofstrea
 
         while (!logFile.eof())
         {
-
             getline(logFile, logLine, '\n');
-            grkRes = grk->Parse(logLine);//, timeLimitInMilliseconds);
+            grkRes = grk->Parse(logLine, timeLimitInMilliseconds);
             if (grkRes->timedOut)
             {
                 (*errorLogger) << "Time out: >" << logLine << "<" << endl;
@@ -269,35 +272,38 @@ clock_t processLogFile(string pathFileName, grok* grk, dbInterface * db, ofstrea
                     (actionTruncated.compare("exact") == 0) ||
                     (actionTruncated.compare("gravi") == 0) ||
                     (actionTruncated.compare("regex") == 0))
+                {
+                    currentQuery.blockerAction(action);
+                    if (dnsServerReplied)
                     {
-                        currentQuery.blockerAction(action);
-                        if (dnsServerReplied)
-                        {
-                            ticksForThisFile += currentQuery.insertIntoDb(linesInserted);
-                        }
+                        ticksForThisFile += currentQuery.insertIntoDb(linesInserted);
                     }
-                    else if (actionTruncated.compare("reply") == 0)
+                }
+                else if (actionTruncated.compare("reply") == 0)
+                {
+                    if (!dnsServerReplied)      // store the first log entry that recieved a replay and then store from then on
                     {
-                        if (!dnsServerReplied)      // store the first log entry that recieved a replay and then store from then on
-                        {
-                            ticksForThisFile += currentQuery.insertIntoDb(linesInserted);
-                            dnsServerReplied = true;
-                        }
+                        ticksForThisFile += currentQuery.insertIntoDb(linesInserted);
+                        dnsServerReplied = true;
                     }
-                    else if ((actionTruncated.compare("confi") == 0) ||
-                        (actionTruncated.compare("speci") == 0) ||
-                        (actionTruncated.compare("Apple") == 0) ||
-                        (actionTruncated.compare("Rate-") == 0))
-                        {
-                            ;   // Ignore
-                        }
-                        else
-                        {
-                            (*errorLogger) << "Unknown: " << endl;
-                        }
+                }
+                else if ((actionTruncated.compare("confi") == 0) ||
+                    (actionTruncated.compare("speci") == 0) ||
+                    (actionTruncated.compare("Apple") == 0) ||
+                    (actionTruncated.compare("Rate-") == 0))
+                {
+                    ;   // Ignore
+                }
+                else
+                {
+                    (*errorLogger) << "Unknown: " << endl;
+                }
             }
         }
     }
+    else
+        (*errorLogger) << "File: " << pathFileName << " failed to open." << endl;
+
     return ticksForThisFile;
 }
 
@@ -317,6 +323,7 @@ int main(int argc, char** argv)
 
     if (customPatterns.is_open())
     {
+        cout << "Locale of custom pattern file:" << customPatterns.getloc().name() << endl;     // test
         list<filesystem::path> fileList;
 
         if (searchDirectoryForMatchingFilesAndAppendToList(&args, &fileList, &errorLogger) > 0)
@@ -337,7 +344,7 @@ int main(int argc, char** argv)
                     string grkPattern = "%{LOGTIME:Timestamp:datetime} %{LOGPROG:Prog}: ((%{LOGACTIONFROM:ActionFrom} %{LOGDOMAIN:DomainFrom} %{LOGDIRECTIONFROM:DirectionFrom} %{LOGEOLFROM:EndOfLineFrom})|(%{LOGACTIONTO:ActionTo} %{LOGDOMAIN:DomainTo} %{LOGDIRECTIONTO:DirectionTo} %{LOGEOLTO:EndOfLineTo})|(%{LOGACTIONIS:ActionIs} %{LOGDOMAIN:DomainIs} %{LOGDIRECTIONIS:DirectionIs} %{LOGEOLIS:EndOfLineIs}))";
                     grok grk(grkPattern, &customPatterns);
 
-                    grk.ParseGrokString();
+                    errorLogger << grk.ParseGrokString() << endl;
 
                     clock_t fileProcessingTimeInTicks;
                     clock_t totalProcessingTimeInTicks = 0;
@@ -358,16 +365,16 @@ int main(int argc, char** argv)
                         {
                             fileProcessingTimeInTicks = processLogFile(*fileIter, &grk, &db, &errorLogger, &linesInserted, args.maxExecTimeInMilliseconds);
 
-                            msg << strNow << " File: " << fileIter->filename() << " insert time: " << (fileProcessingTimeInTicks / CLOCKS_PER_SEC) << " seconds." << endl;
+                            msg << strNow << " File: " << fileIter->filename() << " insert time: " << (fileProcessingTimeInTicks / CLOCKS_PER_SEC) << " seconds.";
                             db.updateLogFileRecord(&readLogKey, linesInserted, msg.str());
 
                             filesProcessed++;
                         }
                         else
                         {
-                            msg << "It looks like " << fileIter->filename() << " is a duplicate." << endl;;
+                            msg << "It looks like " << fileIter->filename() << " is a duplicate.";
                         }
-                        cout << msg.str();
+                        cout << msg.str() << endl;
                         msg.str("");
                     }
 
