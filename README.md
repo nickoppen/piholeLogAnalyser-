@@ -1,4 +1,4 @@
-# Grok++
+# Grok++ library
 A C++ implementation of Roman Marusyk's [Grok.Net](https://github.com/Marusyk/grok.net). All credit for the design goes to him.
 
 ## To Compile
@@ -14,15 +14,18 @@ Written in C++ and developed on the pi.
 
 ## Prerequisites:
 - An instance of MariaDB 
-- MariaDB_connector_cpp available from https://mariadb.com/docs/skysql-previous-release/connect/programming-languages/cpp/install/ (this can be tricky to install)
+- Raspberry Pi OS Bullseye
+- MariaDB_connector_cpp available from https://mariadb.com/docs/skysql-previous-release/connect/programming-languages/cpp/install/ (this can be tricky to install - I found that the lib files need to be in /usr/lib/aarch64-linux-gnu rather than /usr/lib and /usr/lib/mariadb where the install script tries to put them)
 
 ## To Compile
 - compile to gnu++17 standard
-- in linker directory options include -lmariadb once libmariadb.so (linked to libmariadb.so.3) is in /usr/lib/mariadb
+- in linker directory options include -lmariadb once libmariadb.so (linked to libmariadb.so.3) in /usr/lib/mariadb
 - include stdc++fs as a linker dependency
 
 ## To Run
 - Set up the database as per the database schema
+- Copy [grok-patterns](http://grokconstructor.appspot.com/groklib/grok-patterns) file to the program directory
+- Root priviledges are needed to read /var/log/pihole/pihole.log.1 
 - Copy your grok custom pattern file to an accessible location (default: ./grokCustom.txt) Note: if you have scheduled execution using cron then . (current directory) is the users home directory. 
 - Commandline options are:
 

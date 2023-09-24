@@ -82,7 +82,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <IncludePath>/usr/include/mariadb</IncludePath>
-    <LibraryPath>/usr/lib/mariadb</LibraryPath>
+    <LibraryPath>/usr/lib/mariadb;$(LibraryPath)</LibraryPath>
     <ExcludePath>
     </ExcludePath>
     <SourcePath>

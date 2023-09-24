@@ -121,7 +121,7 @@ void readArgs(int argc, char** argv, cliArgs * args)
     args->serverPortNumber = "3306";
     args->databaseName = "dbPiholeLogTest";
 
-    cout << "Regex locale is set to:" << args->rx.getloc().name() << " Classic:" << args->rx.getloc().classic().name() << " System wide:" << locale().name() << endl;
+    //cout << "Regex locale is set to:" << args->rx.getloc().name() << " Classic:" << args->rx.getloc().classic().name() << " System wide:" << locale().name() << endl;
 
     string arg;
 
@@ -215,7 +215,7 @@ clock_t processLogFile(string pathFileName, grok* grk, dbInterface * db, ofstrea
     clock_t ticksForThisFile = 0;
 
     ifstream logFile(pathFileName);
-    cout << "Locale for:" << pathFileName << " is:" << logFile.getloc().name() << endl;
+    //cout << "Locale for:" << pathFileName << " is:" << logFile.getloc().name() << endl;
 
     if (logFile.is_open())
     {
@@ -323,7 +323,7 @@ int main(int argc, char** argv)
 
     if (customPatterns.is_open())
     {
-        cout << "Locale of custom pattern file:" << customPatterns.getloc().name() << endl;     // test
+        //cout << "Locale of custom pattern file:" << customPatterns.getloc().name() << endl;     // test
         list<filesystem::path> fileList;
 
         if (searchDirectoryForMatchingFilesAndAppendToList(&args, &fileList, &errorLogger) > 0)
@@ -344,7 +344,7 @@ int main(int argc, char** argv)
                     string grkPattern = "%{LOGTIME:Timestamp:datetime} %{LOGPROG:Prog}: ((%{LOGACTIONFROM:ActionFrom} %{LOGDOMAIN:DomainFrom} %{LOGDIRECTIONFROM:DirectionFrom} %{LOGEOLFROM:EndOfLineFrom})|(%{LOGACTIONTO:ActionTo} %{LOGDOMAIN:DomainTo} %{LOGDIRECTIONTO:DirectionTo} %{LOGEOLTO:EndOfLineTo})|(%{LOGACTIONIS:ActionIs} %{LOGDOMAIN:DomainIs} %{LOGDIRECTIONIS:DirectionIs} %{LOGEOLIS:EndOfLineIs}))";
                     grok grk(grkPattern, &customPatterns);
 
-                    errorLogger << grk.ParseGrokString() << endl;
+                    /*errorLogger <<*/ grk.ParseGrokString();// << endl;
 
                     clock_t fileProcessingTimeInTicks;
                     clock_t totalProcessingTimeInTicks = 0;
@@ -365,7 +365,7 @@ int main(int argc, char** argv)
                         {
                             fileProcessingTimeInTicks = processLogFile(*fileIter, &grk, &db, &errorLogger, &linesInserted, args.maxExecTimeInMilliseconds);
 
-                            msg << strNow << " File: " << fileIter->filename() << " insert time: " << (fileProcessingTimeInTicks / CLOCKS_PER_SEC) << " seconds.";
+                            msg << strNow << " File: " << fileIter->filename() << " insert time: " << (fileProcessingTimeInTicks / CLOCKS_PER_SEC) << " seconds";
                             db.updateLogFileRecord(&readLogKey, linesInserted, msg.str());
 
                             filesProcessed++;
@@ -374,7 +374,7 @@ int main(int argc, char** argv)
                         {
                             msg << "It looks like " << fileIter->filename() << " is a duplicate.";
                         }
-                        cout << msg.str() << endl;
+                        cout << msg.str() << " for " << linesInserted << " lines" << endl;
                         msg.str("");
                     }
 
