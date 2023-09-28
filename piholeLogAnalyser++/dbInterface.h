@@ -24,17 +24,17 @@ std::time_t to_time_t(TP tp)
 class dbInterface
 {
 private:
-	unique_ptr<Connection> conn;
-	unique_ptr<PreparedStatement> insertStatement;
-	ofstream* errorLogger;
-	bool isADryRun;
-	stringstream ss;
+	unique_ptr<Connection> _conn;
+	unique_ptr<PreparedStatement> _insertStatement;
+	ofstream* _errorLogger;
+	bool _isADryRun;
+	stringstream _ss;
 
 public:
 	dbInterface(bool dryRun, ofstream * errLogger)
 	{
-		isADryRun = dryRun;
-		errorLogger = errLogger;
+		_isADryRun = dryRun;
+		_errorLogger = errLogger;
 	}
 
 	~dbInterface()
@@ -47,11 +47,11 @@ public:
 		if (open(args))
 		{
 			close();
-			(*errorLogger) << "Check succeeded." << endl;
+			(*_errorLogger) << "Check succeeded." << endl;
 			return  true;
 		}
 
-		(*errorLogger) << "Check failed." << endl;
+		(*_errorLogger) << "Check failed." << endl;
 		return false; // failed to open
 	}
 
@@ -72,18 +72,18 @@ public:
 		try
 		{
 			unique_ptr<sql::Connection> connectShon(driver->connect(url, properties));
-			conn = move(connectShon);
+			_conn = move(connectShon);
 		}
 		catch (exception & ex)
 		{
-			(*errorLogger) << ex.what() << endl;
+			(*_errorLogger) << ex.what() << endl;
 			return false;
 		}
 
 		// Prepare the addLogEntry statement for repeated use
 		string sql = "CALL addLogEntry(?, ?, ?, ?)";
-		unique_ptr<PreparedStatement> ps(conn->prepareStatement(sql));
-		insertStatement = move(ps);
+		unique_ptr<PreparedStatement> statement(_conn->prepareStatement(sql));
+		_insertStatement = move(statement);
 		
 		return true;
 	}
@@ -92,14 +92,14 @@ public:
 	{
 		//if (!stmnt->isClosed())
 		//	stmnt->close();
-		if (!conn->isClosed())
-			conn->close();
+		if (!_conn->isClosed())
+			_conn->close();
 	}
 
 	void maxDate(tm * maxD)
 	{
 		string sql = "CALL maxDateYYYYMMDDHourMinSec;";
-		unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("CALL maxDateYYYYMMDDHourMinSec;"));		
+		unique_ptr<sql::PreparedStatement> stmnt(_conn->prepareStatement("CALL maxDateYYYYMMDDHourMinSec;"));		
 
 		try
 		{
@@ -121,7 +121,7 @@ public:
 		}
 		catch (exception & ex)
 		{
-			(*errorLogger) << "Error on executeQuery in maxDate :" << ex.what() << endl;
+			(*_errorLogger) << "Error on executeQuery in maxDate :" << ex.what() << endl;
 		}
 
 		return;
@@ -130,11 +130,11 @@ public:
 	bool updateTblCommon()
 	{
 		string sql = "CALL appendToCommon;";
-		unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement(sql));
+		unique_ptr<sql::PreparedStatement> stmnt(_conn->prepareStatement(sql));
 
 		try
 		{
-			if (!isADryRun)
+			if (!_isADryRun)
 			{
 				ResultSet * res = stmnt->executeQuery();
 				res->close();
@@ -145,7 +145,7 @@ public:
 		}
 		catch (exception& ex)
 		{
-			(*errorLogger) << "Error on executeQuery in updateTblCommon :" << ex.what() << endl;
+			(*_errorLogger) << "Error on executeQuery in updateTblCommon :" << ex.what() << endl;
 			return false;
 		}
 		return true;
@@ -154,11 +154,11 @@ public:
 	bool updateLevelOfInterestFromDate(tm todaysStartDate)
 	{
 		string sql = "CALL updateAllLOIFromDate('" + formatDateTime(todaysStartDate) + "');";
-		unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement(sql));
+		unique_ptr<sql::PreparedStatement> stmnt(_conn->prepareStatement(sql));
 
 		try
 		{
-			if (!isADryRun)
+			if (!_isADryRun)
 			{
 				ResultSet* res = stmnt->executeQuery();
 				res->close();
@@ -169,7 +169,7 @@ public:
 		}
 		catch (exception& ex)
 		{
-			(*errorLogger) << "Error on executeQuery in updateAllLOIFromDate :" << ex.what() << endl;
+			(*_errorLogger) << "Error on executeQuery in updateAllLOIFromDate :" << ex.what() << endl;
 			return false;
 		}
 		return true;
@@ -182,14 +182,14 @@ public:
 		
 		try
 		{
-			insertStatement->setString(1, domain);
-			insertStatement->setInt(2, callerSubNetID);
-			insertStatement->setInt(3, status);
-			insertStatement->setString(4, formatDateTime(logDateTime));
+			_insertStatement->setString(1, domain);
+			_insertStatement->setInt(2, callerSubNetID);
+			_insertStatement->setInt(3, status);
+			_insertStatement->setString(4, formatDateTime(logDateTime));
 
-			if (!isADryRun)  // for testing
+			if (!_isADryRun)  // for testing
 			{
-				sql::ResultSet * res = insertStatement->executeQuery();
+				sql::ResultSet * res = _insertStatement->executeQuery();
 				res->close();
 				delete res;		// to prevent a memory leak
 			}
@@ -198,7 +198,7 @@ public:
 		}
 		catch (exception& ex)
 		{
-			(*errorLogger) << "Error on executeQuery in insertLogEntry :" << ex.what() << endl;
+			(*_errorLogger) << "Error on executeQuery in insertLogEntry :" << ex.what() << endl;
 			return false;
 		}
 
@@ -209,11 +209,11 @@ public:
 	{
 		(*logKey) = std::to_string(fileSize) + ", '" + formatDateTime(fileDateTime);
 		string sql = "CALL recordLogFile(" + *logKey + "')";
-		unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement(sql));
+		unique_ptr<sql::PreparedStatement> stmnt(_conn->prepareStatement(sql));
 
 		try
 		{
-			if (!isADryRun)
+			if (!_isADryRun)
 			{
 				ResultSet* res = stmnt->executeQuery();
 				res->close();
@@ -225,7 +225,7 @@ public:
 		}
 		catch (exception &ex)
 		{
-			(*errorLogger) << "Record Log File Error (insert): " << ex.what() << endl;
+			(*_errorLogger) << "Record Log File Error (insert): " << ex.what() << endl;
 			// return the sql error code for main to distinguish duplicates (to skip the file) from other errors (abort)
 			return false;
 		}
@@ -236,11 +236,11 @@ public:
 		// UPDATE will not fail if fileSize or fileDateTime has changed since RecordLogFile was called
 		//unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("CALL updateLogFileRecord(" + std::to_string(fileSize) + ", '" + formatDateTime(fileDateTime) + "', " + std::to_string(logRowsProcessed) + ", '" + comment + "')"));
 		string sql = "CALL updateLogFileRecord(" + *logKey + "', " + std::to_string(logRowsProcessed) + ", '" + comment + "')";
-		unique_ptr<PreparedStatement> stmnt(conn->prepareStatement(sql));
+		unique_ptr<PreparedStatement> stmnt(_conn->prepareStatement(sql));
 
 		try
 		{
-			if (!isADryRun)
+			if (!_isADryRun)
 			{
 				ResultSet* res = stmnt->executeQuery();
 				res->close();
@@ -252,23 +252,23 @@ public:
 		}
 		catch (exception &ex)
 		{
-			(*errorLogger) << "Record Log File Error (update): " << ex.what() << endl;
+			(*_errorLogger) << "Record Log File Error (update): " << ex.what() << endl;
 			return false;
 		}
 	}
 
-	bool willExecuteDbCommands()
+	const bool willExecuteDbCommands()
 	{
-		return isADryRun;
+		return !_isADryRun;
 	}
 
 private:
 	string formatDateTime(tm dt)
 	{
-		//stringstream ss;
-		ss.str("");
-		ss << put_time(&dt, "%Y-%m-%d %T");
-		return  ss.str();
+		//stringstream _ss;	// now a member variable
+		_ss.str("");
+		_ss << put_time(&dt, "%Y-%m-%d %T");
+		return  _ss.str();
 	}
 
 	string formatDateTime(filesystem::file_time_type fileDateTime)

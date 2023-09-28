@@ -10,9 +10,8 @@ class grokResult
 {
 
 private:
-	//list<unique_ptr<grokNamedSubExpression>> items;
-	map<string, grokNamedSubExpression> items;
-	map<unsigned, string> indexedValues;
+	map<string, grokNamedSubExpression> _items;
+	map<unsigned, string> _indexedValues;
 
 
 public:
@@ -36,48 +35,46 @@ public:
 
 	void reset()
 	{
-		indexedValues.clear();
+		_indexedValues.clear();
 		matched = false;
 		timedOut = false;
 	}
 
 	void addItemResult(string expressionName, string expValue)
 	{
-		if (items.find(expressionName) != items.end())
+		if (_items.find(expressionName) != _items.end())
 		{
-			items[expressionName].setValue(expValue);
+			_items[expressionName].setValue(expValue);
 			return;
 		}
 
-		//unique_ptr<grokNamedSubExpression> newItem = make_unique<grokNamedSubExpression>(expName);
 		grokNamedSubExpression newItem(expressionName);
 		newItem.setValue(expValue);
 
-		items.insert(make_pair(expressionName, newItem));
+		_items.insert(make_pair(expressionName, newItem));
 	}
 
 	void addItemResult(unsigned index, string expressionValue)
 	{
-		indexedValues.insert(make_pair(index, expressionValue));
+		_indexedValues.insert(make_pair(index, expressionValue));
 	}
 
 	void addItemWithType(string expressionName, string expressionType)
 	{
-		//unique_ptr<grokNamedSubExpression> newItem = make_unique<grokNamedSubExpression>(expressionName, expressionType);
 		grokNamedSubExpression newItem(expressionName, expressionType);
 
-		items.insert(make_pair(expressionName, newItem));
+		_items.insert(make_pair(expressionName, newItem));
 
 	}
 
 	grokNamedSubExpression operator[](string expressionName)
 	{
-		return items[expressionName];
+		return _items[expressionName];
 	}
 
 	string operator[](unsigned i)
 	{
-		return indexedValues[i];
+		return _indexedValues[i];
 	}
 };
 

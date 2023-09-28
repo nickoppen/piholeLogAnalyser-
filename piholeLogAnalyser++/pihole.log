@@ -1,0 +1,3 @@
+Jun 30 10:13:19 dnsmasq[8088]: query[A] ventraip.email from 192.168.1.102
+Jun 30 10:13:19 dnsmasq[8088]: forwarded ventraip.email to 203.12.160.35
+Jun 30 10:13:19 dnsmasq[8088]: reply ventraip.email is 110.232.143.200

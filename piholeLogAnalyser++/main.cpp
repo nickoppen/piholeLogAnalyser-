@@ -93,9 +93,9 @@ void checkCommandLineArgs(cliArgs* args, string errorOutputFile)
     }
 
     if (tempDb.willExecuteDbCommands())
-        cout << "The system will NOT update the database (a dry run)." << endl;
-    else
         cout << "The system will update the database (NOT a dry run)." << endl;
+    else
+        cout << "The system will NOT update the database (a dry run)." << endl;
 
     errorLogger.close();
     cout << "Exiting after check..." << endl;
@@ -344,7 +344,7 @@ int main(int argc, char** argv)
                     string grkPattern = "%{LOGTIME:Timestamp:datetime} %{LOGPROG:Prog}: ((%{LOGACTIONFROM:ActionFrom} %{LOGDOMAIN:DomainFrom} %{LOGDIRECTIONFROM:DirectionFrom} %{LOGEOLFROM:EndOfLineFrom})|(%{LOGACTIONTO:ActionTo} %{LOGDOMAIN:DomainTo} %{LOGDIRECTIONTO:DirectionTo} %{LOGEOLTO:EndOfLineTo})|(%{LOGACTIONIS:ActionIs} %{LOGDOMAIN:DomainIs} %{LOGDIRECTIONIS:DirectionIs} %{LOGEOLIS:EndOfLineIs}))";
                     grok grk(grkPattern, &customPatterns);
 
-                    /*errorLogger <<*/ grk.ParseGrokString();// << endl;
+                    /*errorLogger <<*/ grk.parseGrokString();// << endl;
 
                     clock_t fileProcessingTimeInTicks;
                     clock_t totalProcessingTimeInTicks = 0;

@@ -27,7 +27,7 @@ using namespace std;
 class grok
 {
 private:
-        regex _compiledRegex; // the working regex object with all subcomponents expanded out
+        regex _compiledRegex; // the working regex object with all expression generated from the grok string expanded out
 
         regex _grokNamedExpression;     // used to extract the expressions with names e.g. %{LOGTIME:TimeOfCall:datetime} and %{LOGENDOFLINE:EndOfLine}
         regex _grokUnnamedExpression;   // used to extract unnamed expressions e.g. %{LOGIPv4} which is named at a higer level 
@@ -49,7 +49,7 @@ public:
         _grokUnnamedExpression.assign(R"(%\{(\w+)\})");
         _grokExpressionWithType.assign(R"((%\{(\w+):(\w+):(string|datetime|int|float)\}))");
         _grokPattern = grkPattern;
-        LoadPatterns();
+        loadPatterns();
     }
 
     ~grok()
@@ -58,12 +58,12 @@ public:
 
     grok(string grokPattern, ifstream * customPatternFile) : grok(grokPattern)
     {
-        LoadPatterns(customPatternFile);
+        loadPatterns(customPatternFile);
     }
 
     grok(string grokPattern, map<string, string>customPatterns) : grok(grokPattern)
     {
-        AddPatterns(customPatterns);
+        addPatterns(customPatterns);
     }
 
     /// <summary>
@@ -97,8 +97,8 @@ public:
     /// Convert a Grok pattern into a regular expression
     /// The arguement allows for the Grok expression to change over the life of the objcect
     /// </summary>
-    /// <param name="grokPattern">A new patter (default is the one passed on creatioin).</param>
-    string ParseGrokString(string grokPattern = "")
+    /// <param name="grokPattern">A new patter (default is the one passed on creation).</param>
+    string parseGrokString(string grokPattern = "")
     {
         static string pattern;
         string replacedString = "";
@@ -117,10 +117,10 @@ public:
         do
         {
             string searchString = replacedString;
-            for (smatch sm; regex_search(searchString, sm, _grokExpressionWithType);)
+            for (smatch match; regex_search(searchString, match, _grokExpressionWithType);)
             {
-                grkRes.addItemWithType(sm.str(3), sm.str(4));
-                searchString = sm.suffix().str();
+                grkRes.addItemWithType(match.str(3), match.str(4));
+                searchString = match.suffix().str();
             }
 
             //// replace the named components with the expanded version 
@@ -136,10 +136,10 @@ public:
             std::function<string(string, string)> generateReplacePatternForUnnamedExpression = [](string part1, string part2) -> string { string pattern("%\\{" + part1 + "\\}"); return pattern; };
             findGrokSubExpressionReplacements(replacedString, _grokUnnamedExpression, generateReplacePatternForUnnamedExpression , &replacements);
 
-            for (auto it = replacements.begin(); it != replacements.end(); it++)
+            for (auto replacementPair = replacements.begin(); replacementPair != replacements.end(); replacementPair++)
             {
-                rxReplace.assign(it->first);
-                replacedString = std::regex_replace(replacedString, rxReplace, it->second);
+                rxReplace.assign(replacementPair->first);
+                replacedString = std::regex_replace(replacedString, rxReplace, replacementPair->second);
             }
             replacements.clear();
 
@@ -160,17 +160,17 @@ public:
 private:
     bool matchText(string text)
     {
-        smatch sm;
+        smatch match;
 
-        if (regex_match(text, sm, _compiledRegex))
+        if (regex_match(text, match, _compiledRegex))
         {
             grkRes.matched = true;
             for (auto nameIndexPair = _nameIndexMap.begin(); nameIndexPair != _nameIndexMap.end(); nameIndexPair++)
             {
-                grkRes.addItemResult(nameIndexPair->first, sm.str(nameIndexPair->second));
+                grkRes.addItemResult(nameIndexPair->first, match.str(nameIndexPair->second));
             }
-            for (size_t i = 0; i < sm.size(); i++)
-                grkRes.addItemResult((unsigned)i, sm.str(i));
+            for (size_t i = 0; i < match.size(); i++)
+                grkRes.addItemResult((unsigned)i, match.str(i));
             return true;
         }
         else
@@ -186,37 +186,42 @@ private:
         string expandedExpression;  // the expanded subexpression that may include further grok components that need replacing
         regex rxDollarSign("\\$");
 
-        for (smatch smat; regex_search(searchString, smat, rxSubExpression);)
+        for (smatch match; regex_search(searchString, match, rxSubExpression);)
         {
-            rxReplacePattern = generateRxPattern(smat.str(1), smat.str(2));
+            rxReplacePattern = generateRxPattern(match.str(1), match.str(2));
             if (replacements->find(rxReplacePattern) == replacements->end())
             {
-                expandedExpression = regex_replace(replaceWithName(smat), rxDollarSign, "$$$$");
+                expandedExpression = regex_replace(replaceWithName(match), rxDollarSign, "$$$$");
                 replacements->insert(make_pair(rxReplacePattern, expandedExpression));
             }
-            searchString = smat.suffix().str();
+            searchString = match.suffix().str();
         }
         return expandedExpression;
     }
 
     void loadCustomPatterns(ifstream* customPatternFile)
     {
-        LoadPatterns(customPatternFile);
+        loadPatterns(customPatternFile);
     }
 
-    void AddPatterns(map<string, string>customPatterns)
+    void addPatterns(map<string, string>customPatterns)
     {
-        for (std::map<string, string>::iterator pattern = customPatterns.begin(); pattern != customPatterns.end(); ++pattern)
-            AddPatternIfNotExists(pattern->first, pattern->second);
+        for (std::map<string, string>::iterator patternPair = customPatterns.begin(); patternPair != customPatterns.end(); ++patternPair)
+            addPatternIfNotExists(patternPair->first, patternPair->second);
     }
 
-    void AddPatternIfNotExists(string key, string value)
+    void addPatternIfNotExists(string key, string value)
     {
-        EnsurePatternIsValid(value);
+        ensurePatternIsValid(value);
         _patterns.insert(make_pair(key, value));        // Does nothing if key is a duplicate
-        //            if ()
     }
 
+    /// <summary>
+    /// Because c++ regex does not yet support named expression I extract the names and 
+    /// store them in grokResult to be associated with the result when it becomes available
+    /// and return the string without the names
+    /// </summary>
+    /// <param name="patter">The regex string with names.</param>
     string createNameIndexRemovingNames(string pattern)
     {
         int groupNumber = 0;
@@ -265,7 +270,7 @@ private:
         return deNamedPattern;
     }
 
-    void LoadPatterns()
+    void loadPatterns()
     {
         // Load default patterns
         string oneLine;
@@ -286,7 +291,7 @@ private:
             while (!patterns.eof())
             {
                 getline(patterns, oneLine, '\n');
-                ProcessPatternLine(oneLine);
+                processPatternLine(oneLine);
             }
             patterns.close();
         }
@@ -294,17 +299,17 @@ private:
             throw grokException("Standard Pattern file not found in the executable's directory.");
     }
 
-    void LoadPatterns(ifstream * customPatterns)
+    void loadPatterns(ifstream * customPatterns)
     {
         string oneLine;
         while (!customPatterns->eof())
         {
             getline((*customPatterns), oneLine, '\n');
-            ProcessPatternLine(oneLine);
+            processPatternLine(oneLine);
         }
     }
 
-    void ProcessPatternLine(string line)
+    void processPatternLine(string line)
     {
         if (line.length() == 0) /// empty line
             return;
@@ -320,14 +325,14 @@ private:
         string key(line.substr(0, spacePos));
         string value(line.substr(spacePos + 1));
 
-        AddPatternIfNotExists(key, value);
+        addPatternIfNotExists(key, value);
     }
 
-    void EnsurePatternIsValid(string pattern)
+    void ensurePatternIsValid(string pattern)
     {
         try
         {
-            static const auto r = regex(pattern, std::regex::optimize); // retest      /// Seems to think that all expressions are valid e.g. ^(Jan"|Feb)$
+            static const auto r = regex(pattern, std::regex::optimize); // retest  before ::optimize ^(Jan"|Feb)$ was valid
         }
         catch (const regex_error& e)
         {

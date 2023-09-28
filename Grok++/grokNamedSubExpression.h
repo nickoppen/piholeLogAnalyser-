@@ -8,28 +8,28 @@ class grokNamedSubExpression
 private:
 	string _name;
 	string _value;
-	enum desiredResultType { StringType, IntType, TimestampType, FloatType} desiredType;
+	enum desiredResultType { StringType, IntType, TimestampType, FloatType} _desiredType;
 
 public:
 	grokNamedSubExpression()
 	{
-		desiredType = StringType;
+		_desiredType = StringType;
 	}
 
 	grokNamedSubExpression(string expressionName)
 	{
 		_name = expressionName;
-		desiredType = StringType;
+		_desiredType = StringType;
 	}
 
 	grokNamedSubExpression(string expressionName, string typeAsString) : grokNamedSubExpression(expressionName)
 	{
 		if (typeAsString.compare("int") == 0)
-			desiredType = IntType;
+			_desiredType = IntType;
 		else if (typeAsString.compare("float") == 0)
-			desiredType = FloatType;
+			_desiredType = FloatType;
 		else if (typeAsString.compare("datetime") == 0)
-			desiredType = TimestampType;
+			_desiredType = TimestampType;
 		else
 			cout << "Unsupported type: " << typeAsString << endl;
 	}
@@ -41,13 +41,13 @@ public:
 
 	bool value(int * valueAsInt, string * valueAsString = nullptr)
 	{
-		if (desiredType != IntType)
+		if (_desiredType != IntType)
 			return false;
 
 		if (valueAsString != nullptr)
 			(*valueAsString) = _value;
 
-		if (desiredType == IntType)
+		if (_desiredType == IntType)
 		{
 			(*valueAsInt) = std::stoi(_value);
 			return true;
@@ -57,13 +57,13 @@ public:
 
 	bool value(float * valueAsFloat, string * valueAsString = nullptr)
 	{
-		if (desiredType != FloatType)
+		if (_desiredType != FloatType)
 			return false;
 
 		if (valueAsString != nullptr)
 			(*valueAsString) = _value;
 
-		if (desiredType == IntType)
+		if (_desiredType == IntType)
 		{
 			(*valueAsFloat) = std::stof(_value);
 			return true;
@@ -80,7 +80,7 @@ public:
 
 	bool value(tm* timeOfCall, string* valueAsString, char * dateTimeFormat)
 	{
-		if (desiredType != TimestampType)
+		if (_desiredType != TimestampType)
 			return false;
 
 		(*valueAsString) = _value;

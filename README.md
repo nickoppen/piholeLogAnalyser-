@@ -5,7 +5,7 @@ A C++ implementation of Roman Marusyk's [Grok.Net](https://github.com/Marusyk/gr
 - include -pthread as a dependency in linker options
 
 ## To Run
-- Copy grok-patterns (pre-made custom patterns) to the executable's directory
+- Copy [grok-patterns](http://grokconstructor.appspot.com/groklib/grok-patterns) file to the program directory
 
 # PiholeLogAnalyser++
 An interpreter/loader for pihole log files. Output is stored in a MariaDB database.
@@ -15,7 +15,7 @@ Written in C++ and developed on the pi.
 ## Prerequisites:
 - An instance of MariaDB 
 - Raspberry Pi OS Bullseye
-- MariaDB_connector_cpp available from https://mariadb.com/docs/skysql-previous-release/connect/programming-languages/cpp/install/ (this can be tricky to install - I found that the lib files need to be in /usr/lib/aarch64-linux-gnu rather than /usr/lib and /usr/lib/mariadb where the install script tries to put them)
+- MariaDB_connector_cpp available from https://mariadb.com/docs/skysql-previous-release/connect/programming-languages/cpp/install/ (this can be tricky to install - I found that the lib files need to be in /usr/lib/aarch64-linux-gnu as well as /usr/lib and /usr/lib/mariadb where the install script tries to put them)
 
 ## To Compile
 - compile to gnu++17 standard
@@ -24,7 +24,6 @@ Written in C++ and developed on the pi.
 
 ## To Run
 - Set up the database as per the database schema
-- Copy [grok-patterns](http://grokconstructor.appspot.com/groklib/grok-patterns) file to the program directory
 - Root priviledges are needed to read /var/log/pihole/pihole.log.1 
 - Copy your grok custom pattern file to an accessible location (default: ./grokCustom.txt) Note: if you have scheduled execution using cron then . (current directory) is the users home directory. 
 - Commandline options are:

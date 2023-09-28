@@ -7,60 +7,76 @@
 class dnsQuery
 {
 public:
+	bool isInserted = false;
+
+private:
+	tm _timeOfQuery;
+	//string _queryType;
+	string _domain = "";
+	string _callerIP = "";
+	int _callerSubNetID;
+	int _status;
+	dbInterface* _db;
+	ofstream* _errorLogger;
+	string _currentYearString;
+	int _currentMonth;
+	int _currentYear;
+
+public:
 	dnsQuery(dbInterface * databaseInterface, ofstream* errorFile)
 	{
 		time_t rightNow = time(0);
 		tm * tmNow = localtime(&rightNow);
-		currentYearString = std::to_string(1900 + tmNow->tm_year);
-		currentMonth = tmNow->tm_mon;
-		currentYear = tmNow->tm_year;
+		_currentYearString = std::to_string(1900 + tmNow->tm_year);
+		_currentMonth = tmNow->tm_mon;
+		_currentYear = tmNow->tm_year;
 
-		db = databaseInterface;
-		errorLogger = errorFile;
+		_db = databaseInterface;
+		_errorLogger = errorFile;
 	}
 
 	void setRequest(tm logTimeOfCall, string targetDomain, string callerIPAddr)
 	{
-		timeOfQuery = logTimeOfCall;
+		_timeOfQuery = logTimeOfCall;
 
 		// There is no year part to the time stamp on the log record so
 		// start by assuming that the log record is in the current year
-		timeOfQuery.tm_year = currentYear;
+		_timeOfQuery.tm_year = _currentYear;
 
 		// check if the calculated time is less than now() i.e. it happened in the past
 		// The log records loaded on 1 Jan are mostly from Dec last year so assuming the current year is the year of the log line that would put Dec records in the future
-		if (timeOfQuery.tm_mon > currentMonth)
+		if (_timeOfQuery.tm_mon > _currentMonth)
 		{
-			timeOfQuery.tm_year -= 1;
+			_timeOfQuery.tm_year -= 1;
 		}
 
-		domain = targetDomain;
-		callerIP = callerIPAddr;
-		callerSubNetID = subNetIDFromIPAddr(callerIPAddr);
+		_domain = targetDomain;
+		_callerIP = callerIPAddr;
+		_callerSubNetID = subNetIDFromIPAddr(callerIPAddr);
 		isInserted = false;
 	}
 
 	void setRequest(string logTimeOfCall, string targetDomain, string callerIPAddr)
 	{
-		strptime(logTimeOfCall.c_str(), "%b %d %H:%M:%S", &timeOfQuery);
-		setRequest(timeOfQuery, targetDomain, callerIPAddr);
+		strptime(logTimeOfCall.c_str(), "%b %d %H:%M:%S", &_timeOfQuery);
+		setRequest(_timeOfQuery, targetDomain, callerIPAddr);
 	}
 
 	void blockerAction(string blockerAction)
 	{
 //		this->action = (blockerAction);
 		if (blockerAction.compare("forwarded") == 0)
-			status = 0;
+			_status = 0;
 		else if (blockerAction.compare("gravity blocked") == 0)
-			status = 1;
+			_status = 1;
 		else if (blockerAction.compare("cached") == 0)
-			status = 2;
+			_status = 2;
 		else if ((blockerAction.compare("regex blacklisted") == 0) || (blockerAction.compare("exactly blacklisted") == 0))
-			status = 3;
+			_status = 3;
 		else
 		{
-			status = 127;
-			(*errorLogger) << "Unknown blocker action: >" << blockerAction << "<" << endl;
+			_status = 127;
+			(*_errorLogger) << "Unknown blocker action: >" << blockerAction << "<" << endl;
 		}
 	}
 
@@ -71,7 +87,7 @@ public:
 		else
 		{
 			clock_t begin = clock();
-			db->insertLogEntry(timeOfQuery, domain, status, callerSubNetID);
+			_db->insertLogEntry(_timeOfQuery, _domain, _status, _callerSubNetID);
 			clock_t end = clock();
 			(*linesInserted)++;	
 			isInserted = true;
@@ -90,22 +106,5 @@ private:
 		return std::stoi(ip.substr(dotPos + 1));
 	}
 
-public:
-	tm timeOfQuery;
-	string queryType;
-	string domain = "";
-	string callerIP = "";
-//	string action = "";
-	bool isInserted = false;
-
-private:
-	int callerSubNetID;
-	int status;
-	dbInterface * db;
-	ofstream* errorLogger;
-
-	string currentYearString;
-	int currentMonth;
-	int currentYear;
 };
 
