@@ -121,8 +121,6 @@ void readArgs(int argc, char** argv, cliArgs * args)
     args->serverPortNumber = "3306";
     args->databaseName = "dbPiholeLogTest";
 
-    //cout << "Regex locale is set to:" << args->rx.getloc().name() << " Classic:" << args->rx.getloc().classic().name() << " System wide:" << locale().name() << endl;
-
     string arg;
 
     for (int i = 1; i < argc; i++)  // argv[0] is the executable name
@@ -213,13 +211,11 @@ void readArgs(int argc, char** argv, cliArgs * args)
 clock_t processLogFile(string pathFileName, grok* grk, dbInterface * db, ofstream* errorLogger, int * linesInserted, unsigned long timeLimitInMilliseconds)
 {
     clock_t ticksForThisFile = 0;
-
     ifstream logFile(pathFileName);
-    //cout << "Locale for:" << pathFileName << " is:" << logFile.getloc().name() << endl;
 
     if (logFile.is_open())
     {
-        dnsQuery currentQuery(db, errorLogger);// , args.customPatternFile);
+        dnsQuery currentQuery(db, errorLogger);
         bool dnsServerReplied = false;
         string logLine;
         string action = "";
@@ -235,7 +231,7 @@ clock_t processLogFile(string pathFileName, grok* grk, dbInterface * db, ofstrea
         while (!logFile.eof())
         {
             getline(logFile, logLine, '\n');
-            grkRes = grk->Parse(logLine, timeLimitInMilliseconds);
+            grkRes = grk->parse(logLine, timeLimitInMilliseconds);
             if (grkRes->timedOut)
             {
                 (*errorLogger) << "Time out: >" << logLine << "<" << endl;
@@ -323,7 +319,6 @@ int main(int argc, char** argv)
 
     if (customPatterns.is_open())
     {
-        //cout << "Locale of custom pattern file:" << customPatterns.getloc().name() << endl;     // test
         list<filesystem::path> fileList;
 
         if (searchDirectoryForMatchingFilesAndAppendToList(&args, &fileList, &errorLogger) > 0)

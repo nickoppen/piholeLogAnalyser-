@@ -131,6 +131,10 @@ public:
 	{
 		string sql = "CALL appendToCommon;";
 		unique_ptr<sql::PreparedStatement> stmnt(_conn->prepareStatement(sql));
+		//sql::ConnectOptionsMap connection_properties;
+		//unsigned int timeout = 180;
+		//connection_properties["MYSQL_OPT_WRITE_TIMEOUT"] = timeout; // max_connection_time on the server is set to 0 (no timeout)???
+		//_conn->c
 
 		try
 		{

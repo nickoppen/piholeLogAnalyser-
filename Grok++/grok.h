@@ -72,7 +72,7 @@ public:
     /// </summary>
     /// <param name="test">The text to be parsed.</param>
     /// <param name="milliseconds">The time limit (in milliseconds) for regex to be allowed to run</param>
-    grokResult * Parse(string text, unsigned long milliSeconds = 0)
+    grokResult * parse(string text, unsigned long milliSeconds = 0)
     {
         grkRes.reset();
         if (milliSeconds == 0)        // Not timed so call synchronously
