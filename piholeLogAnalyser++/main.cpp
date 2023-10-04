@@ -115,11 +115,11 @@ void readArgs(int argc, char** argv, cliArgs * args)
     args->errorPathFilename = "./loadError.txt";
     args->maxExecTimeInMilliseconds = 0;
     args->customPatternFilename = "./grokCustom.txt";
-    args->dbUserName = "piholeTestUser";
-    args->dbUserPwd = "Test:User:123";
+    args->dbUserName = "logUser";
+    args->dbUserPwd = "oppen20:Log";
     args->serverIPAddress = "192.168.1.110";
     args->serverPortNumber = "3306";
-    args->databaseName = "dbPiholeLogTest";
+    args->databaseName = "dbPiholeLog";
 
     string arg;
 
