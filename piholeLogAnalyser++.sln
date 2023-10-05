@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Grok++", "Grok++\Grok++.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "piholeLogAnalyser++", "piholeLogAnalyser++\piholeLogAnalyser++.vcxproj", "{DBE89817-4159-4A6E-91D9-B311FBA3DE54}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "databaseComponents", "databaseComponents\databaseComponents.vcxproj", "{B1216755-58F0-42E1-BE0D-C37F82B54ADB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,26 @@ Global
 		{DBE89817-4159-4A6E-91D9-B311FBA3DE54}.Release|x86.ActiveCfg = Release|x86
 		{DBE89817-4159-4A6E-91D9-B311FBA3DE54}.Release|x86.Build.0 = Release|x86
 		{DBE89817-4159-4A6E-91D9-B311FBA3DE54}.Release|x86.Deploy.0 = Release|x86
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|Any CPU.Build.0 = Debug|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|ARM.ActiveCfg = Debug|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|ARM.Build.0 = Debug|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|ARM64.ActiveCfg = Debug|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|ARM64.Build.0 = Debug|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|x64.ActiveCfg = Debug|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|x64.Build.0 = Debug|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|x86.ActiveCfg = Debug|Win32
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Debug|x86.Build.0 = Debug|Win32
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|Any CPU.ActiveCfg = Release|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|Any CPU.Build.0 = Release|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|ARM.ActiveCfg = Release|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|ARM.Build.0 = Release|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|ARM64.ActiveCfg = Release|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|ARM64.Build.0 = Release|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|x64.ActiveCfg = Release|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|x64.Build.0 = Release|x64
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|x86.ActiveCfg = Release|Win32
+		{B1216755-58F0-42E1-BE0D-C37F82B54ADB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
