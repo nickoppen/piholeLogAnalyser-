@@ -1,3 +1,0 @@
-/home/user0/projects/piholeLogAnalyser-/Grok++/build/CMakeFiles/grok++.dir
-/home/user0/projects/piholeLogAnalyser-/Grok++/build/CMakeFiles/edit_cache.dir
-/home/user0/projects/piholeLogAnalyser-/Grok++/build/CMakeFiles/rebuild_cache.dir
