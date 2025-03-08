@@ -19,6 +19,7 @@ bld/
 #Cmake files
 build/*
 Grok++/*.so
+Grok++/build
 
 piholeLogAnalyser 
 # The executable
