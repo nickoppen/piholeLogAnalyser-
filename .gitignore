@@ -16,11 +16,16 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+#Cmake files
 build/*
 Grok++/*.so
 
 piholeLogAnalyser 
 # The executable
 
-
+# oputput files
 loadError.txt
+
+
+#git files
+gitPush.sh
