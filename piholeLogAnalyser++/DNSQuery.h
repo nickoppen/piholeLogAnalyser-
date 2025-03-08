@@ -65,7 +65,7 @@ public:
 	void blockerAction(string blockerAction)
 	{
 //		this->action = (blockerAction);
-		if (blockerAction.compare("forwarded") == 0)
+		if ((blockerAction.compare("forwarded") == 0) || (blockerAction.compare("cached-stale") == 0))
 			_status = 0;
 		else if (blockerAction.compare("gravity blocked") == 0)
 			_status = 1;

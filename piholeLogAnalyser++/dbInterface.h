@@ -6,6 +6,7 @@
 #include <ctime>
 #include <iostream>
 #include <iomanip>
+#include <chrono>
 
 using namespace std;
 using namespace sql;
@@ -164,6 +165,7 @@ public:
 		{
 			if (!_isADryRun)
 			{
+				stmnt->setQueryTimeout(600);
 				ResultSet* res = stmnt->executeQuery();
 				res->close();
 				delete res;		// to prevent a memory leak

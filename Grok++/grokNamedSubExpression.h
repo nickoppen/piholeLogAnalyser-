@@ -1,7 +1,10 @@
 #pragma once
+
 #include <string>
 #include <iostream>
 
+
+using namespace std;
 
 class grokNamedSubExpression
 {
@@ -33,7 +36,7 @@ public:
 		else
 			cout << "Unsupported type: " << typeAsString << endl;
 	}
- 
+
 	void setValue(string valueAsString)
 	{
 		_value = valueAsString;

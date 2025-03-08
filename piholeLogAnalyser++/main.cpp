@@ -2,6 +2,7 @@
 #include <fstream>
 #include <filesystem>
 #include <memory>
+#include <cstring>
 #include <regex>
 #include "piholeLogAnalyserDefs.h"
 #include "dbInterface.h"
@@ -373,8 +374,8 @@ int main(int argc, char** argv)
                         msg.str("");
                     }
 
-                    db.updateLevelOfInterestFromDate(lastDate);
                     db.updateTblCommon();
+                    db.updateLevelOfInterestFromDate(lastDate);
 
                     totalProcessingTimeInTicks = clock() - totalProcessingTimeInTicks;
                     cout << strNow << " Files processed: " << filesProcessed << " in " << (totalProcessingTimeInTicks / CLOCKS_PER_SEC) << " seconds." << endl;

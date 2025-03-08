@@ -182,6 +182,8 @@ private:
 
     string findGrokSubExpressionReplacements(string searchString, regex rxSubExpression, std::function<string(string, string)> generateRxPattern, map<string, string> * replacements)
     {
+        // replace std::function<string(string, string)> generateRxPattern with String::format() when using c++20
+
         string rxReplacePattern;    // the rx string of all grok sub expressions that need to be replace
         string expandedExpression;  // the expanded subexpression that may include further grok components that need replacing
         regex rxDollarSign("\\$");

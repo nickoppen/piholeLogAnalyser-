@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -shared -Wl,-soname,libgrok++.so -o libgrok++.so CMakeFiles/grok++.dir/grok.cpp.o 
